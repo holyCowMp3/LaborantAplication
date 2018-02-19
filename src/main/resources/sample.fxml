@@ -33,16 +33,48 @@
                               <VBox alignment="TOP_CENTER" layoutX="139.0" layoutY="116.0" prefHeight="685.0" prefWidth="377.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <children>
                                     <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="31.0" prefWidth="70.0" text="Група" />
-                                    <ChoiceBox fx:id="groupChoiceBox" prefWidth="150.0" />
+                                    <HBox alignment="TOP_CENTER" prefHeight="33.0" prefWidth="635.0">
+                                       <children>
+                                          <ChoiceBox fx:id="groupChoiceBox" prefWidth="150.0" />
+                                          <Separator prefHeight="0.0" prefWidth="15.0" />
+                                          <TextField fx:id="groupTextField" prefHeight="26.0" prefWidth="147.0" />
+                                          <Separator prefHeight="0.0" prefWidth="15.0" />
+                                          <Button fx:id="groupButton" mnemonicParsing="false" onAction="#createGroupCalendar" text="Додати" />
+                                       </children>
+                                    </HBox>
                                     <Separator prefHeight="28.0" prefWidth="635.0" />
                                     <Label prefHeight="22.0" prefWidth="67.0" text="Викладач" />
-                                    <ComboBox fx:id="teachersComboBox" prefWidth="150.0" />
+                                    <HBox alignment="TOP_CENTER" prefHeight="33.0" prefWidth="635.0">
+                                       <children>
+                                          <ComboBox fx:id="teachersComboBox" prefWidth="150.0" />
+                                          <Separator prefHeight="0.0" prefWidth="15.0" />
+                                          <TextField fx:id="teachersTextField" prefHeight="26.0" prefWidth="147.0" />
+                                          <Separator prefHeight="0.0" prefWidth="15.0" />
+                                          <Button fx:id="teacherButton" mnemonicParsing="false" onAction="#createTeacherCalendar" text="Додати" />
+                                       </children>
+                                    </HBox>
                                     <Separator prefHeight="36.0" prefWidth="635.0" />
-                                    <Label layoutX="294.0" layoutY="95.0" prefHeight="22.0" prefWidth="67.0" text="Аудиторія" />
-                                    <ComboBox fx:id="auditoryComboBox" prefWidth="150.0" />
+                                    <Label layoutX="294.0" layoutY="95.0" prefHeight="22.0" prefWidth="72.0" text="Аудиторія" />
+                                    <HBox alignment="TOP_CENTER" prefHeight="33.0" prefWidth="635.0">
+                                       <children>
+                                          <ComboBox fx:id="auditoryComboBox" prefWidth="150.0" />
+                                          <Separator prefHeight="0.0" prefWidth="15.0" />
+                                          <TextField fx:id="auditoryTextField" prefHeight="26.0" prefWidth="147.0" />
+                                          <Separator prefHeight="0.0" prefWidth="15.0" />
+                                          <Button fx:id="AuditoryButton" mnemonicParsing="false" onAction="#createAuditoryCalendar" text="Додати" />
+                                       </children>
+                                    </HBox>
                                     <Separator layoutX="10.0" layoutY="143.0" prefHeight="36.0" prefWidth="635.0" />
                                     <Label prefHeight="26.0" prefWidth="61.0" text="Предмет" />
-                                    <ComboBox fx:id="lessonsComboBox" prefWidth="150.0" />
+                                    <HBox alignment="TOP_CENTER" prefHeight="33.0" prefWidth="635.0">
+                                       <children>
+                                          <ComboBox fx:id="lessonsComboBox" prefWidth="150.0" />
+                                          <Separator prefHeight="0.0" prefWidth="15.0" />
+                                          <TextField fx:id="lessonTextField" prefHeight="26.0" prefWidth="147.0" />
+                                          <Separator prefHeight="0.0" prefWidth="15.0" />
+                                          <Button fx:id="lessonButton" mnemonicParsing="false" onAction="#createLessonCalendar" text="Додати" />
+                                       </children>
+                                    </HBox>
                                     <Separator prefHeight="27.0" prefWidth="635.0" />
                                     <Label prefHeight="31.0" prefWidth="103.0" text="Номер заняття" />
                                     <TextField fx:id="numberOfLessonTextField" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="26.0" prefWidth="68.0" />
@@ -50,12 +82,12 @@
                                     <Label text="Тип заняття" />
                                     <ToolBar maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="40.0" prefWidth="338.0">
                                        <items>
-                                          <RadioButton mnemonicParsing="false" onAction="#getLessonType" text="П/З" />
-                                          <RadioButton mnemonicParsing="false" onAction="#getLessonType" text="Г/З" />
-                                          <RadioButton mnemonicParsing="false" onAction="#getLessonType" text="Л" />
-                                          <RadioButton mnemonicParsing="false" onAction="#getLessonType" text="С" />
-                                          <RadioButton mnemonicParsing="false" onAction="#getLessonType" text="Екзамен" />
-                                          <RadioButton alignment="CENTER_RIGHT" contentDisplay="CENTER" layoutX="186.0" layoutY="15.0" mnemonicParsing="false" onAction="#getLessonType" text="Залік" />
+                                          <RadioButton fx:id="radioButton1" mnemonicParsing="false" onAction="#getLessonType" text="П/З" />
+                                          <RadioButton fx:id="radioButton2" mnemonicParsing="false" onAction="#getLessonType" text="Г/З" />
+                                          <RadioButton fx:id="radioButton3" mnemonicParsing="false" onAction="#getLessonType" text="Л" />
+                                          <RadioButton fx:id="radioButton4" mnemonicParsing="false" onAction="#getLessonType" text="С" />
+                                          <RadioButton fx:id="radioButton5" mnemonicParsing="false" onAction="#getLessonType" text="Екзамен" />
+                                          <RadioButton fx:id="radioButton6" alignment="CENTER_RIGHT" contentDisplay="CENTER" layoutX="186.0" layoutY="15.0" mnemonicParsing="false" onAction="#getLessonType" text="Залік" />
                                        </items>
                                     </ToolBar>
                                     <Separator prefWidth="200.0" />
@@ -67,7 +99,7 @@
                                        </children>
                                     </HBox>
                                     <Separator prefHeight="28.0" prefWidth="635.0" />
-                                    <Button fx:id="executeEvent" mnemonicParsing="false" text="Додати" />
+                                    <Button mnemonicParsing="false" onAction="#executeEvent" text="Додати" />
                                  </children>
                               </VBox>
                            </children>
