@@ -7,6 +7,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -15,6 +16,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.web.WebView?>
 
@@ -58,17 +60,30 @@
                                     </ToolBar>
                                     <Separator prefWidth="200.0" />
                                     <Label text="Дата" />
-                                    <DatePicker prefHeight="26.0" prefWidth="154.0" />
+                                    <HBox alignment="CENTER" prefHeight="35.0" prefWidth="635.0">
+                                       <children>
+                                          <DatePicker fx:id="datePicker" prefHeight="26.0" prefWidth="195.0" />
+                                          <Spinner fx:id="pairPicker" editable="true" prefHeight="26.0" prefWidth="71.0" />
+                                       </children>
+                                    </HBox>
                                     <Separator prefHeight="28.0" prefWidth="635.0" />
-                                    <Button mnemonicParsing="false" text="Додати" />
+                                    <Button fx:id="executeEvent" mnemonicParsing="false" text="Додати" />
                                  </children>
                               </VBox>
                            </children>
                         </AnchorPane>
                         <TableView fixedCellSize="0.0" maxHeight="-Infinity" maxWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="926.0" styleClass="table-row-cell" stylesheets="@../table.css">
                            <columns>
-                              <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Викладач" />
-                              <TableColumn minWidth="-Infinity" prefWidth="200.0" text="Понеділок">
+                              <TableColumn fx:id="teacherColumn" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Викладач" />
+                              <TableColumn fx:id="mondayColumn" minWidth="-Infinity" prefWidth="200.0" text="Понеділок">
+                                 <columns>
+                                    <TableColumn fx:id="firstMon" minWidth="-Infinity" prefWidth="50.0" resizable="false" text="1" />
+                                    <TableColumn fx:id="secondMon" minWidth="-Infinity" prefWidth="50.0" resizable="false" text="2" />
+                                    <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="3" />
+                                    <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="4" />
+                                 </columns>
+                              </TableColumn>
+                              <TableColumn fx:id="tuesdayColumn" minWidth="-Infinity" prefWidth="200.0" text="Вівторок">
                                  <columns>
                                     <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="1" />
                                     <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="2" />
@@ -76,7 +91,7 @@
                                     <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="4" />
                                  </columns>
                               </TableColumn>
-                              <TableColumn minWidth="-Infinity" prefWidth="200.0" text="Вівторок">
+                              <TableColumn fx:id="wednesdayColumn" minWidth="-Infinity" prefWidth="200.0" text="Середа">
                                  <columns>
                                     <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="1" />
                                     <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="2" />
@@ -84,7 +99,7 @@
                                     <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="4" />
                                  </columns>
                               </TableColumn>
-                              <TableColumn minWidth="-Infinity" prefWidth="200.0" text="Середа">
+                              <TableColumn fx:id="thursdayColumn" minWidth="-Infinity" prefWidth="200.0" text="Четвер">
                                  <columns>
                                     <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="1" />
                                     <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="2" />
@@ -92,7 +107,7 @@
                                     <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="4" />
                                  </columns>
                               </TableColumn>
-                              <TableColumn minWidth="-Infinity" prefWidth="200.0" text="Четвер">
+                              <TableColumn fx:id="fridayColumn" minWidth="-Infinity" prefWidth="200.0" text="П'ятниця">
                                  <columns>
                                     <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="1" />
                                     <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="2" />
@@ -100,15 +115,7 @@
                                     <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="4" />
                                  </columns>
                               </TableColumn>
-                              <TableColumn minWidth="-Infinity" prefWidth="200.0" text="П'ятниця">
-                                 <columns>
-                                    <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="1" />
-                                    <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="2" />
-                                    <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="3" />
-                                    <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="4" />
-                                 </columns>
-                              </TableColumn>
-                              <TableColumn minWidth="-Infinity" prefWidth="150.0" text="Субота">
+                              <TableColumn fx:id="saturdayColumn" minWidth="-Infinity" prefWidth="150.0" text="Субота">
                                  <columns>
                                     <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="1" />
                                     <TableColumn minWidth="-Infinity" prefWidth="50.0" resizable="false" text="2" />
@@ -191,7 +198,7 @@
          <content>
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                <children>
-                  <WebView layoutX="336.0" layoutY="144.0" prefHeight="687.0" prefWidth="1280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <WebView fx:id="googleCalendarWeb" layoutX="336.0" layoutY="144.0" prefHeight="687.0" prefWidth="1280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                </children></AnchorPane>
          </content>
       </Tab>
