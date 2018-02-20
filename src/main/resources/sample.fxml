@@ -7,7 +7,6 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -95,7 +94,8 @@
                                     <HBox alignment="CENTER" prefHeight="35.0" prefWidth="635.0">
                                        <children>
                                           <DatePicker fx:id="datePicker" prefHeight="26.0" prefWidth="195.0" />
-                                          <Spinner fx:id="pairPicker" editable="true" prefHeight="26.0" prefWidth="71.0" />
+                                          <Separator prefHeight="0.0" prefWidth="15.0" />
+                                          <ComboBox fx:id="pairPicker" prefHeight="26.0" prefWidth="56.0" />
                                        </children>
                                     </HBox>
                                     <Separator prefHeight="28.0" prefWidth="635.0" />

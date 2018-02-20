@@ -142,32 +142,39 @@ public class Controller {
         return listEntries;
     }
 
-    public static Event chooseLesson (int i, Event event, LocalDate date) throws Exception{
+    /**
+     * method choose the time of lesson (i), and set the start and end time for events, with 1 pair.
+     */
+
+    public static Event chooseLesson(String i, Event event, LocalDate date) throws Exception {
         DateTimeFormatter formatterDay = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTime startDateTime;
         DateTime endDateTime;
-        switch (i){
-            case 1: {
-                startDateTime = new DateTime(date.format(formatterDay)+"T09:00:00+02:00");
-                endDateTime = new DateTime(date.format(formatterDay)+"T10:35:00+02:00");
+        switch (i) {
+            case "1": {
+                startDateTime = new DateTime(date.format(formatterDay) + "T09:00:00+02:00");
+                endDateTime = new DateTime(date.format(formatterDay) + "T10:35:00+02:00");
                 event.setStart(new EventDateTime().setDateTime(startDateTime).setTimeZone("Europe/Kiev"));
-                event.setEnd(new EventDateTime().setDateTime(endDateTime).setTimeZone("Europe/Kiev")) ; return event;
+                event.setEnd(new EventDateTime().setDateTime(endDateTime).setTimeZone("Europe/Kiev"));
+                return event;
             }
-            case 2: {
-                startDateTime = new DateTime(date.format(formatterDay)+"T10:50:00+02:00");
-                endDateTime = new DateTime(date.format(formatterDay)+"T12:25:00+02:00");
+            case "2": {
+                startDateTime = new DateTime(date.format(formatterDay) + "T10:50:00+02:00");
+                endDateTime = new DateTime(date.format(formatterDay) + "T12:25:00+02:00");
                 event.setStart(new EventDateTime().setDateTime(startDateTime).setTimeZone("Europe/Kiev"));
-                event.setEnd(new EventDateTime().setDateTime(endDateTime).setTimeZone("Europe/Kiev")) ; return event;
+                event.setEnd(new EventDateTime().setDateTime(endDateTime).setTimeZone("Europe/Kiev"));
+                return event;
             }
-            case 3: {
-                startDateTime = new DateTime(date.format(formatterDay)+"T12:40:00+02:00");
-                endDateTime = new DateTime(date.format(formatterDay)+"T14:15:00+02:00");
+            case "3": {
+                startDateTime = new DateTime(date.format(formatterDay) + "T12:40:00+02:00");
+                endDateTime = new DateTime(date.format(formatterDay) + "T14:15:00+02:00");
                 event.setStart(new EventDateTime().setDateTime(startDateTime).setTimeZone("Europe/Kiev"));
-                event.setEnd(new EventDateTime().setDateTime(endDateTime).setTimeZone("Europe/Kiev")) ; return event;
+                event.setEnd(new EventDateTime().setDateTime(endDateTime).setTimeZone("Europe/Kiev"));
+                return event;
             }
             default: {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-                chooseLesson(Integer.parseInt(reader.readLine()),event, date);
+                chooseLesson(reader.readLine(), event, date);
             }
 
         }
@@ -219,7 +226,7 @@ public class Controller {
     private DatePicker datePicker;
 
     @FXML
-    private Spinner<Integer> pairPicker;
+    private ComboBox<String> pairPicker;
 
     @FXML
     private RadioButton radioButton1;
@@ -272,37 +279,17 @@ public class Controller {
 
     private ToggleGroup toggleGroup;
     private String lessonType;
+
     @FXML
     void initialize() throws Exception {
 
-
+        pairPicker.getItems().addAll("1", "2", "3", "4");
         // Build a new authorized API client service.
         // Note: Do not confuse this class with the
         //   com.google.api.services.calendar.model.Calendar class.
         com.google.api.services.calendar.Calendar service =
                 getCalendarService();
 
-        // List the next 10 events from the primary calendar.
-        DateTime now = new DateTime(System.currentTimeMillis());
-        Events events = service.events().list("primary")
-                .setMaxResults(10)
-                .setTimeMin(now)
-                .setOrderBy("startTime")
-                .setSingleEvents(true)
-                .execute();
-        List<Event> items = events.getItems();
-        if (items.size() == 0) {
-            System.out.println("No upcoming events found.");
-        } else {
-            System.out.println("Upcoming events");
-            for (Event event : items) {
-                DateTime start = event.getStart().getDateTime();
-                if (start == null) {
-                    start = event.getStart().getDate();
-                }
-                System.out.printf("%s (%s)\n", event.getSummary(), start);
-            }
-        }
 
         /** Creating a Web Page with kafedra calendar
          */
@@ -317,7 +304,7 @@ public class Controller {
         teachersComboBox.setItems(calendarListStrings);
         lessonsComboBox.setItems(calendarListStrings);
         TextFields.bindAutoCompletion(auditoryTextField, calendarListStrings);
-        calendarIdMap.values().stream().forEach(System.out::print);
+
 
     }
 
@@ -337,6 +324,7 @@ public class Controller {
 
 
     }
+
     @FXML
     void createAuditoryCalendar(ActionEvent event) throws Exception {
         if (!(auditoryComboBox.getItems().contains(auditoryTextField.getText()))) {
@@ -385,44 +373,71 @@ public class Controller {
 
     }
 
-    public void sendToCalendars (Event event)throws Exception {
+    public void sendToCalendars(Event event) throws Exception {
 
-       String[] cal =  event.getSummary().split(" ");
+        String[] cal = event.getSummary().split(" ");
+        DateTime now = new DateTime(System.currentTimeMillis());
+        Events events = getCalendarService().events().list(cal[0])
+                .setMaxResults(10)
+                .setTimeMin(now)
+                .setOrderBy("startTime")
+                .setSingleEvents(true)
+                .execute();
+        List<Event> items = events.getItems();
+        if (items.size() == 0) {
+            for (String s : cal) {
+                String calendarId = new String(calendarIdMap.get(s));
+                event = getCalendarService().events().insert(calendarId, event).execute();
+                System.out.println(event.getHtmlLink());
+            }
+        } else {
 
-        for (String s: cal) {
-            String calendarId = new String(calendarIdMap.get(s));
-            event = getCalendarService().events().insert(calendarId, event).execute();
-            System.out.println(event.getHtmlLink());
+            for (Event eventr : items) {
+                DateTime start = event.getStart().getDateTime();
+                if (start == null) {
+                    start = eventr.getStart().getDate();
+                } else if (eventr == event) {
+
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Дані пари вже існують!");
+                    alert.setHeaderText("Перевірте правильність вводу");
+                    alert.setContentText("Будьте обережні наступного разу");
+
+                    alert.showAndWait();
+
+                }
+            }
         }
 
 
     }
+
     @FXML
-    void executeEvent(ActionEvent e) throws Exception{
+    void executeEvent(ActionEvent e) throws Exception {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-try {
+                try {
 
-    Event event = new Event()
-            .setSummary(groupTextField.getText() + " " + auditoryTextField.getText() + " " + teachersTextField.getText() + " " + lessonTextField.getText() + " " + numberOfLessonTextField.getText() + " " + lessonType);
-    event = chooseLesson(1,event, datePicker.getValue());
+                    Event event = new Event()
+                            .setSummary(groupTextField.getText() + " " + auditoryTextField.getText() + " " + teachersTextField.getText() + " " + lessonTextField.getText()).setDescription(numberOfLessonTextField.getText() + lessonType);
+                    event = chooseLesson(pairPicker.getValue(), event, datePicker.getValue());
 
-    EventReminder[] reminderOverrides = new EventReminder[]{
-            new EventReminder().setMethod("email").setMinutes(24 * 60),
-            new EventReminder().setMethod("popup").setMinutes(10),
-    };
-    Event.Reminders reminders = new Event.Reminders()
-            .setUseDefault(false)
-            .setOverrides(Arrays.asList(reminderOverrides));
-    event.setReminders(reminders);
+                    EventReminder[] reminderOverrides = new EventReminder[]{
+                            new EventReminder().setMethod("email").setMinutes(24 * 60),
+                            new EventReminder().setMethod("popup").setMinutes(15),
+                    };
+                    Event.Reminders reminders = new Event.Reminders()
+                            .setUseDefault(false)
+                            .setOverrides(Arrays.asList(reminderOverrides));
+                    event.setReminders(reminders);
 
-    sendToCalendars(event);
-}catch (Exception e){
-    e.printStackTrace();
-}
-}
-    });
+                    sendToCalendars(event);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
-    }
+}
 
