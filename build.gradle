@@ -21,6 +21,8 @@ dependencies{
     compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
     compile 'com.google.apis:google-api-services-calendar:v3-rev292-1.23.0'
     compile group: 'org.controlsfx', name: 'controlsfx', version: '9.0.0'
+    compile group: 'com.google.zxing', name: 'core', version: '3.3.2'
+
 }
 apply plugin: 'javafx-gradle-plugin'
 

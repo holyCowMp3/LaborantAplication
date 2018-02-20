@@ -13,11 +13,15 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.*;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import org.controlsfx.control.textfield.TextFields;
@@ -31,6 +35,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Controller {
@@ -128,6 +133,7 @@ public class Controller {
      * @execute() method
      */
     private static Map<String, String> calendarIdMap;
+    private static ObservableList<QR> qrList;
 
     public static List<CalendarListEntry> getCalendarListEntries() throws Exception {
         List<CalendarListEntry> listEntries;
@@ -136,14 +142,18 @@ public class Controller {
             CalendarList calendarList = getCalendarService().calendarList().list().setPageToken(pageToken).execute();
             listEntries = calendarList.getItems();
             calendarIdMap = listEntries.stream().collect(Collectors.toMap(i -> i.getSummary(), i -> i.getId()));
+
             pageToken = calendarList.getNextPageToken();
         }
         while (pageToken != null);
         return listEntries;
     }
 
+
+    private List<String> auditoryList;
+
     /**
-     * method choose the time of lesson (i), and set the start and end time for events, with 1 pair.
+     * method choose the time of lesson (i), and set the start and end time for events, with pair.
      */
 
     public static Event chooseLesson(String i, Event event, LocalDate date) throws Exception {
@@ -274,15 +284,24 @@ public class Controller {
     @FXML
     private TableColumn<?, ?> saturdayColumn;
 
+
     @FXML
     private WebView googleCalendarWeb;
 
-    private ToggleGroup toggleGroup;
+    @FXML
+    private TableView<QR> qrTable;
+
+    @FXML
+    private ImageView qrBar;
+
     private String lessonType;
+
 
     @FXML
     void initialize() throws Exception {
 
+
+        radioButton1.setSelected(true);
         pairPicker.getItems().addAll("1", "2", "3", "4");
         // Build a new authorized API client service.
         // Note: Do not confuse this class with the
@@ -301,12 +320,38 @@ public class Controller {
         calendarListStrings = FXCollections.observableArrayList(item.stream().map(i -> i.getSummary()).collect(Collectors.toList()));
         auditoryComboBox.setItems(FXCollections.observableArrayList(calendarListStrings.stream().filter(i -> i.startsWith("ауд.2")).collect(Collectors.toList())));
         groupChoiceBox.setItems(FXCollections.observableArrayList(calendarListStrings.stream().filter(i -> i.startsWith("2")).collect(Collectors.toList())));
-        teachersComboBox.setItems(calendarListStrings);
-        lessonsComboBox.setItems(calendarListStrings);
+        teachersComboBox.setItems(FXCollections.observableArrayList(calendarListStrings.stream().filter(i -> i.endsWith(".")).collect(Collectors.toList())));
+        lessonsComboBox.setItems(FXCollections.observableArrayList(calendarListStrings.stream().filter(i -> (i.length() < 4) & !Character.isDigit(i.charAt(0))).collect(Collectors.toList())));
         TextFields.bindAutoCompletion(auditoryTextField, calendarListStrings);
+        auditoryList = calendarIdMap.keySet().stream().filter(i -> i.startsWith("2")).collect(Collectors.toList());
 
+        Function<String, QR> func = i -> new QR(i);
+
+        qrList = FXCollections.observableArrayList(calendarIdMap.values().stream().map(func).collect(Collectors.toList()));
+
+        qrTable.setItems(qrList);
+        TableColumn<QR, String> id = new TableColumn<>("ID");
+        id.setCellValueFactory(i -> i.getValue().getName());
+        TableColumn<QR, ImageView> image = new TableColumn<>("QR");
+        image.setCellValueFactory(i -> new SimpleObjectProperty<>(i.getValue().getCode()));
+        image.setCellFactory(i -> {
+            return new TableCell<>() {
+                @Override
+                protected void updateItem(ImageView item, boolean empty) {
+
+                    super.updateItem(item, empty);
+                    System.out.println(item);
+                    setGraphic(item);
+                }
+            };
+        });
+        qrBar.setImage(qrList.get(0).getCode().getImage());
+        qrTable.getColumns().addAll(id,image);
 
     }
+
+
+
 
     public static void createGoogleCalendar(String name) throws Exception {
         Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, authorize())
@@ -370,8 +415,28 @@ public class Controller {
 
     @FXML
     void getLessonType(ActionEvent event) {
+        ToggleGroup toggleGroup = new ToggleGroup();
+        radioButton1.setToggleGroup(toggleGroup);
+        radioButton2.setToggleGroup(toggleGroup);
+        radioButton3.setToggleGroup(toggleGroup);
+        radioButton4.setToggleGroup(toggleGroup);
+        radioButton5.setToggleGroup(toggleGroup);
+        radioButton6.setToggleGroup(toggleGroup);
 
+        toggleGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+            public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle) {
+
+                if (toggleGroup.getSelectedToggle() != null) {
+                    RadioButton rb = (RadioButton) toggleGroup.getSelectedToggle();
+                    lessonType = new String(rb.getText());
+                    // Do something here with the userData of newly selected radioButton
+
+                }
+
+            }
+        });
     }
+
 
     public void sendToCalendars(Event event) throws Exception {
 
@@ -420,7 +485,8 @@ public class Controller {
                 try {
 
                     Event event = new Event()
-                            .setSummary(groupTextField.getText() + " " + auditoryTextField.getText() + " " + teachersTextField.getText() + " " + lessonTextField.getText()).setDescription(numberOfLessonTextField.getText() + lessonType);
+                            .setSummary(groupTextField.getText() + " " + auditoryTextField.getText() + " " + teachersTextField.getText())
+                            .setDescription(lessonTextField.getText()).setDescription(numberOfLessonTextField.getText() + lessonType);
                     event = chooseLesson(pairPicker.getValue(), event, datePicker.getValue());
 
                     EventReminder[] reminderOverrides = new EventReminder[]{
