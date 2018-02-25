@@ -6,11 +6,14 @@ import javafx.scene.image.ImageView;
 
 public class QR {
     private StringProperty name;
+    private StringProperty summary;
     private ImageView code;
 
     public QR(String name) {
         this.name = new SimpleStringProperty(name);
-        this.code = new ImageView(QrGenerator.generateQr(name));
+        this.summary = new SimpleStringProperty(Controller.getCalendarIdMap().get(name.toString()));
+        this.code = new ImageView(QrGenerator.generateQr(this.summary.getValue()));
+
     }
 
     public StringProperty getName() {
@@ -27,6 +30,18 @@ public class QR {
 
     public void setCode(ImageView code) {
         this.code.setImage(code.getImage());
+    }
+
+    public String getSummary() {
+        return summary.get();
+    }
+
+    public StringProperty summaryProperty() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary.set(summary);
     }
 
     @Override

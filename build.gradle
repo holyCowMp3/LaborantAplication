@@ -5,7 +5,7 @@ buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
-
+        maven { url 'https://jitpack.io' }
     }
 }
 apply plugin: 'java'
@@ -13,6 +13,7 @@ apply plugin: 'java'
 repositories {
     mavenLocal()
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 
@@ -22,6 +23,7 @@ dependencies{
     compile 'com.google.apis:google-api-services-calendar:v3-rev292-1.23.0'
     compile group: 'org.controlsfx', name: 'controlsfx', version: '9.0.0'
     compile group: 'com.google.zxing', name: 'core', version: '3.3.2'
+    compile 'com.github.goxr3plus:JavaFX-Web-Browser:V3.3.0'
 
 }
 apply plugin: 'javafx-gradle-plugin'

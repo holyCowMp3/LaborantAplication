@@ -22,8 +22,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
+import javafx.scene.layout.AnchorPane;
 import org.controlsfx.control.textfield.TextFields;
 
 import java.io.BufferedReader;
@@ -125,6 +124,10 @@ public class Controller {
                 .build();
     }
 
+
+    public static Map<String, String> getCalendarIdMap() {
+        return calendarIdMap;
+    }
 
     /**
      * reading list of calendars from gAcount creating a list with names of calendars
@@ -286,13 +289,10 @@ public class Controller {
 
 
     @FXML
-    private WebView googleCalendarWeb;
+    private AnchorPane googleCalendarWeb;
 
     @FXML
     private TableView<QR> qrTable;
-
-    @FXML
-    private ImageView qrBar;
 
     private String lessonType;
 
@@ -312,8 +312,8 @@ public class Controller {
 
         /** Creating a Web Page with kafedra calendar
          */
-        WebEngine engine = googleCalendarWeb.getEngine();
-        engine.load("https://calendar.google.com/calendar/embed?src=vitikaf22%40gmail.com&ctz=Europe%2FKiev");
+
+
 
 
         List<CalendarListEntry> item = getCalendarListEntries();
@@ -322,17 +322,22 @@ public class Controller {
         groupChoiceBox.setItems(FXCollections.observableArrayList(calendarListStrings.stream().filter(i -> i.startsWith("2")).collect(Collectors.toList())));
         teachersComboBox.setItems(FXCollections.observableArrayList(calendarListStrings.stream().filter(i -> i.endsWith(".")).collect(Collectors.toList())));
         lessonsComboBox.setItems(FXCollections.observableArrayList(calendarListStrings.stream().filter(i -> (i.length() < 4) & !Character.isDigit(i.charAt(0))).collect(Collectors.toList())));
-        TextFields.bindAutoCompletion(auditoryTextField, calendarListStrings);
         auditoryList = calendarIdMap.keySet().stream().filter(i -> i.startsWith("2")).collect(Collectors.toList());
+
+        TextFields.bindAutoCompletion(auditoryTextField, calendarListStrings);
+        TextFields.bindAutoCompletion(groupTextField, groupChoiceBox.getItems());
+        TextFields.bindAutoCompletion(teachersTextField, teachersComboBox.getItems());
+        TextFields.bindAutoCompletion(lessonTextField,lessonsComboBox.getItems());
 
         Function<String, QR> func = i -> new QR(i);
 
-        qrList = FXCollections.observableArrayList(calendarIdMap.values().stream().map(func).collect(Collectors.toList()));
-
-        qrTable.setItems(qrList);
+        qrList = FXCollections.observableArrayList(calendarIdMap.keySet().stream().map(func).collect(Collectors.toList()));
         TableColumn<QR, String> id = new TableColumn<>("ID");
+        id.setStyle( "-fx-alignment: CENTER;");
+        qrList.stream().forEach(i -> System.out.println(i.summaryProperty()));
         id.setCellValueFactory(i -> i.getValue().getName());
         TableColumn<QR, ImageView> image = new TableColumn<>("QR");
+        image.setStyle( "-fx-alignment: CENTER;");
         image.setCellValueFactory(i -> new SimpleObjectProperty<>(i.getValue().getCode()));
         image.setCellFactory(i -> {
             return new TableCell<>() {
@@ -340,13 +345,13 @@ public class Controller {
                 protected void updateItem(ImageView item, boolean empty) {
 
                     super.updateItem(item, empty);
-                    System.out.println(item);
                     setGraphic(item);
                 }
             };
         });
-        qrBar.setImage(qrList.get(0).getCode().getImage());
+
         qrTable.getColumns().addAll(id,image);
+        qrTable.setItems(qrList);
 
     }
 
@@ -357,16 +362,20 @@ public class Controller {
         Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, authorize())
                 .setApplicationName("applicationName").build();
 
+        AclRule aclRule = service.acl().get(name, "ruleId").execute();
+
         // Create a new calendar
         com.google.api.services.calendar.model.Calendar calendar = new com.google.api.services.calendar.model.Calendar();
         calendar.setSummary(name);
         calendar.setTimeZone("Europe/Kiev");
 
 // Insert the new calendar
+
         com.google.api.services.calendar.model.Calendar createdCalendar = service.calendars().insert(calendar).execute();
 //Update the list of entries;
         getCalendarListEntries();
-
+       // service.acl().update(name, aclRule.getId(), aclRule).execute();
+      //  getCalendarListEntries();
 
     }
 
@@ -442,9 +451,10 @@ public class Controller {
 
         String[] cal = event.getSummary().split(" ");
         DateTime now = new DateTime(System.currentTimeMillis());
-        Events events = getCalendarService().events().list(cal[0])
+        System.out.println(cal[1]);
+        Events events = getCalendarService().events().list(calendarIdMap.get(cal[1]))
                 .setMaxResults(10)
-                .setTimeMin(now)
+                .setTimeMin(event.getStart().getDateTime()).setTimeMax(event.getEnd().getDateTime())
                 .setOrderBy("startTime")
                 .setSingleEvents(true)
                 .execute();
@@ -453,15 +463,11 @@ public class Controller {
             for (String s : cal) {
                 String calendarId = new String(calendarIdMap.get(s));
                 event = getCalendarService().events().insert(calendarId, event).execute();
+
                 System.out.println(event.getHtmlLink());
             }
         } else {
-
-            for (Event eventr : items) {
-                DateTime start = event.getStart().getDateTime();
-                if (start == null) {
-                    start = eventr.getStart().getDate();
-                } else if (eventr == event) {
+            if (items.get(0).getStart().toString() == event.getStart().toString()) {
 
                     Alert alert = new Alert(Alert.AlertType.WARNING);
                     alert.setTitle("Дані пари вже існують!");
@@ -475,7 +481,7 @@ public class Controller {
         }
 
 
-    }
+
 
     @FXML
     void executeEvent(ActionEvent e) throws Exception {
@@ -485,8 +491,8 @@ public class Controller {
                 try {
 
                     Event event = new Event()
-                            .setSummary(groupTextField.getText() + " " + auditoryTextField.getText() + " " + teachersTextField.getText())
-                            .setDescription(lessonTextField.getText()).setDescription(numberOfLessonTextField.getText() + lessonType);
+                            .setSummary(groupTextField.getText() + " " + auditoryTextField.getText() + " " + teachersTextField.getText()+" "+ lessonTextField.getText())
+                            .setDescription(numberOfLessonTextField.getText() + "  " +lessonType);
                     event = chooseLesson(pairPicker.getValue(), event, datePicker.getValue());
 
                     EventReminder[] reminderOverrides = new EventReminder[]{
@@ -497,7 +503,7 @@ public class Controller {
                             .setUseDefault(false)
                             .setOverrides(Arrays.asList(reminderOverrides));
                     event.setReminders(reminders);
-
+                    event.setCreator(new Event.Creator().setEmail("hellios.dt@gmail.com"));
                     sendToCalendars(event);
                 } catch (Exception e) {
                     e.printStackTrace();
