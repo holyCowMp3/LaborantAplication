@@ -23,18 +23,20 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import org.controlsfx.control.CheckComboBox;
 import org.controlsfx.control.textfield.TextFields;
+import org.controlsfx.validation.ValidationSupport;
+import org.controlsfx.validation.Validator;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Controller {
@@ -130,13 +132,13 @@ public class Controller {
     }
 
     /**
-     * reading list of calendars from gAcount creating a list with names of calendars
-     * choice from that calendars change the calendars where events was use
-     *
-     * @execute() method
+     * reading list of calendars from gAcount creating a list with {@link CalendarListEntry}
+     * create a map with the summary as keys, and id as values;
+     * use @calendarIdMap to save result;
+     * change the calendars where events was use @execute method
      */
     private static Map<String, String> calendarIdMap;
-    private static ObservableList<QR> qrList;
+
 
     public static List<CalendarListEntry> getCalendarListEntries() throws Exception {
         List<CalendarListEntry> listEntries;
@@ -149,17 +151,22 @@ public class Controller {
             pageToken = calendarList.getNextPageToken();
         }
         while (pageToken != null);
+
         return listEntries;
     }
 
 
-    private List<String> auditoryList;
-
     /**
      * method choose the time of lesson (i), and set the start and end time for events, with pair.
+     * using the @{@link DateTimeFormatter formatterDay} to format selected date from @{@link LocalDate datePicker};
+     *
+     * @param date  date from DatePicker
+     * @param event event which modify;
+     * @param i     number of pair;
+     * @return event with start and end times;
      */
 
-    public static Event chooseLesson(String i, Event event, LocalDate date) throws Exception {
+    public static Event chooseLesson(String i, Event event, LocalDate date) {
         DateTimeFormatter formatterDay = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTime startDateTime;
         DateTime endDateTime;
@@ -185,52 +192,59 @@ public class Controller {
                 event.setEnd(new EventDateTime().setDateTime(endDateTime).setTimeZone("Europe/Kiev"));
                 return event;
             }
-            default: {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-                chooseLesson(reader.readLine(), event, date);
+            case "4": {
+                startDateTime = new DateTime(date.format(formatterDay) + "T15:45:00+02:00");
+                endDateTime = new DateTime(date.format(formatterDay) + "T17:20:00+02:00");
+                event.setStart(new EventDateTime().setDateTime(startDateTime).setTimeZone("Europe/Kiev"));
+                event.setEnd(new EventDateTime().setDateTime(endDateTime).setTimeZone("Europe/Kiev"));
+                return event;
             }
-
+            default: {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Невірні данні!");
+                alert.setHeaderText("Перевірте правильність вводу");
+                alert.setContentText("Будьте обережні наступного разу");
+                alert.showAndWait();
+            }
         }
         return null;
     }
 
+    /**
+     * @ObservableList<String> list with summary of each calendar;
+     */
     private ObservableList<String> calendarListStrings;
-
+    /**
+     * @ObservableList<QR> list with generated QR objects;
+     */
+    private static ObservableList<QR> qrList;
+    /**
+     * {@link TableView<QR> qrTable} table with QR objects;
+     */
     @FXML
-    private ChoiceBox<String> groupChoiceBox;
+    private TableView<QR> qrTable;
+    /**
+     * parent AnchorPane as container for the {@link CheckComboBox} using ControlsFX library
+     */
+    @FXML
+    private AnchorPane parentToCombo;
+
+    private CheckComboBox groupChoiceBox;
 
     @FXML
     private TextField groupTextField;
 
-    @FXML
-    private Button groupButton;
-
-    @FXML
-    private ComboBox<String> teachersComboBox;
 
     @FXML
     private TextField teachersTextField;
 
-    @FXML
-    private Button teacherButton;
-
-    @FXML
-    private ComboBox<String> auditoryComboBox;
 
     @FXML
     private TextField auditoryTextField;
 
-    @FXML
-    private Button AuditoryButton;
-
-    @FXML
-    private ComboBox<String> lessonsComboBox;
 
     @FXML
     private TextField lessonTextField;
-
-    @FXML
-    private Button lessonButton;
 
     @FXML
     private TextField numberOfLessonTextField;
@@ -291,71 +305,64 @@ public class Controller {
     @FXML
     private AnchorPane googleCalendarWeb;
 
-    @FXML
-    private TableView<QR> qrTable;
 
     private String lessonType;
 
+    private static List<String> auditoryList = Collections.EMPTY_LIST;
+    private static List<String> teachersList = Collections.EMPTY_LIST;
+    private static List<String> lessonList = Collections.EMPTY_LIST;
 
     @FXML
     void initialize() throws Exception {
 
+        ValidationSupport validationSupport = new ValidationSupport();
 
         radioButton1.setSelected(true);
         pairPicker.getItems().addAll("1", "2", "3", "4");
+        validationSupport.registerValidator(pairPicker, Validator.createEmptyValidator("Потрібно обрати пару"));
+
         // Build a new authorized API client service.
         // Note: Do not confuse this class with the
         //   com.google.api.services.calendar.model.Calendar class.
         com.google.api.services.calendar.Calendar service =
                 getCalendarService();
-
-
-        /** Creating a Web Page with kafedra calendar
-         */
-
-
-
-
         List<CalendarListEntry> item = getCalendarListEntries();
         calendarListStrings = FXCollections.observableArrayList(item.stream().map(i -> i.getSummary()).collect(Collectors.toList()));
-        auditoryComboBox.setItems(FXCollections.observableArrayList(calendarListStrings.stream().filter(i -> i.startsWith("ауд.2")).collect(Collectors.toList())));
-        groupChoiceBox.setItems(FXCollections.observableArrayList(calendarListStrings.stream().filter(i -> i.startsWith("2")).collect(Collectors.toList())));
-        teachersComboBox.setItems(FXCollections.observableArrayList(calendarListStrings.stream().filter(i -> i.endsWith(".")).collect(Collectors.toList())));
-        lessonsComboBox.setItems(FXCollections.observableArrayList(calendarListStrings.stream().filter(i -> (i.length() < 4) & !Character.isDigit(i.charAt(0))).collect(Collectors.toList())));
-        auditoryList = calendarIdMap.keySet().stream().filter(i -> i.startsWith("2")).collect(Collectors.toList());
+        groupChoiceBox = new CheckComboBox<>(FXCollections.observableArrayList(getCalendarListEntries().stream().map(i -> i.getSummary()).filter(i -> i.startsWith("2")).collect(Collectors.toList())));
+        groupChoiceBox.prefHeightProperty().setValue(parentToCombo.heightProperty().getValue());
+        groupChoiceBox.prefWidthProperty().setValue(parentToCombo.getPrefWidth());
+        parentToCombo.getChildren().add(groupChoiceBox);
 
-        TextFields.bindAutoCompletion(auditoryTextField, calendarListStrings);
-        TextFields.bindAutoCompletion(groupTextField, groupChoiceBox.getItems());
-        TextFields.bindAutoCompletion(teachersTextField, teachersComboBox.getItems());
-        TextFields.bindAutoCompletion(lessonTextField,lessonsComboBox.getItems());
+        auditoryList = calendarIdMap.keySet().stream().filter(i -> i.startsWith("ауд.")).collect(Collectors.toList());
+        teachersList = calendarIdMap.keySet().stream().filter(i -> i.endsWith(".")).collect(Collectors.toList());
+        lessonList = calendarIdMap.keySet().stream().filter(i -> (i.length() < 4) & !Character.isDigit(i.charAt(0))).collect(Collectors.toList());
 
-        Function<String, QR> func = i -> new QR(i);
+        TextFields.bindAutoCompletion(auditoryTextField, FXCollections.observableArrayList(auditoryList)).setMaxWidth(auditoryTextField.getPrefWidth());
+        TextFields.bindAutoCompletion(teachersTextField, FXCollections.observableArrayList(teachersList)).setMaxWidth(teachersTextField.getPrefWidth());
+        TextFields.bindAutoCompletion(lessonTextField, FXCollections.observableArrayList(lessonList)).setMaxWidth(lessonTextField.getPrefWidth());
 
-        qrList = FXCollections.observableArrayList(calendarIdMap.keySet().stream().map(func).collect(Collectors.toList()));
+        qrList = FXCollections.observableArrayList(calendarIdMap.keySet().stream().map(i -> new QR(i)).collect(Collectors.toList()));
         TableColumn<QR, String> id = new TableColumn<>("ID");
-        id.setStyle( "-fx-alignment: CENTER;");
+        id.setStyle("-fx-alignment: CENTER;");
         qrList.stream().forEach(i -> System.out.println(i.summaryProperty()));
         id.setCellValueFactory(i -> i.getValue().getName());
         TableColumn<QR, ImageView> image = new TableColumn<>("QR");
-        image.setStyle( "-fx-alignment: CENTER;");
+        image.setStyle("-fx-alignment: CENTER;");
         image.setCellValueFactory(i -> new SimpleObjectProperty<>(i.getValue().getCode()));
         image.setCellFactory(i -> {
             return new TableCell<>() {
                 @Override
                 protected void updateItem(ImageView item, boolean empty) {
-
                     super.updateItem(item, empty);
                     setGraphic(item);
                 }
             };
         });
 
-        qrTable.getColumns().addAll(id,image);
+        qrTable.getColumns().addAll(id, image);
         qrTable.setItems(qrList);
 
     }
-
-
 
 
     public static void createGoogleCalendar(String name) throws Exception {
@@ -374,16 +381,16 @@ public class Controller {
         com.google.api.services.calendar.model.Calendar createdCalendar = service.calendars().insert(calendar).execute();
 //Update the list of entries;
         getCalendarListEntries();
-       // service.acl().update(name, aclRule.getId(), aclRule).execute();
-      //  getCalendarListEntries();
+        // service.acl().update(name, aclRule.getId(), aclRule).execute();
+        //  getCalendarListEntries();
 
     }
 
     @FXML
     void createAuditoryCalendar(ActionEvent event) throws Exception {
-        if (!(auditoryComboBox.getItems().contains(auditoryTextField.getText()))) {
+        if (!(auditoryList.contains(auditoryTextField.getText()))) {
             createGoogleCalendar(auditoryTextField.getText());
-            auditoryComboBox.getItems().add(auditoryTextField.getText());
+            auditoryList.add(auditoryTextField.getText());
         } else {
 
         }
@@ -402,9 +409,9 @@ public class Controller {
 
     @FXML
     void createLessonCalendar(ActionEvent event) throws Exception {
-        if (!(lessonsComboBox.getItems().contains(lessonTextField.getText()))) {
+        if (!(lessonList.contains(lessonTextField.getText()))) {
             createGoogleCalendar(lessonTextField.getText());
-            lessonsComboBox.getItems().add(lessonTextField.getText());
+            lessonList.add(lessonTextField.getText());
         } else {
 
         }
@@ -413,11 +420,11 @@ public class Controller {
 
     @FXML
     void createTeacherCalendar(ActionEvent event) throws Exception {
-        if (!(teachersComboBox.getItems().contains(teachersTextField.getText()))) {
+        if (!(teachersList.contains(teachersTextField.getText()))) {
             createGoogleCalendar(teachersTextField.getText());
-            teachersComboBox.getItems().add(teachersTextField.getText());
+            teachersList.add(teachersTextField.getText());
         } else {
-            teachersTextField.setText(teachersComboBox.getValue());
+
         }
     }
 
@@ -469,18 +476,16 @@ public class Controller {
         } else {
             if (items.get(0).getStart().toString() == event.getStart().toString()) {
 
-                    Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setTitle("Дані пари вже існують!");
-                    alert.setHeaderText("Перевірте правильність вводу");
-                    alert.setContentText("Будьте обережні наступного разу");
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Дані пари вже існують!");
+                alert.setHeaderText("Перевірте правильність вводу");
+                alert.setContentText("Будьте обережні наступного разу");
 
-                    alert.showAndWait();
+                alert.showAndWait();
 
-                }
             }
         }
-
-
+    }
 
 
     @FXML
@@ -489,10 +494,11 @@ public class Controller {
             @Override
             public void run() {
                 try {
-
+                    String groups = String.join(" ", groupChoiceBox.getCheckModel().getCheckedItems());
+                    System.out.println(groups);
                     Event event = new Event()
-                            .setSummary(groupTextField.getText() + " " + auditoryTextField.getText() + " " + teachersTextField.getText()+" "+ lessonTextField.getText())
-                            .setDescription(numberOfLessonTextField.getText() + "  " +lessonType);
+                            .setSummary(groups + " " + auditoryTextField.getText() + " " + teachersTextField.getText() + " " + lessonTextField.getText())
+                            .setDescription(numberOfLessonTextField.getText() + "  " + lessonType);
                     event = chooseLesson(pairPicker.getValue(), event, datePicker.getValue());
 
                     EventReminder[] reminderOverrides = new EventReminder[]{
