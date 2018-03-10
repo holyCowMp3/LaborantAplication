@@ -132,10 +132,10 @@ public class Controller {
     }
 
     /**
-     * reading list of calendars from gAcount creating a list with {@link CalendarListEntry}
-     * create a map with the summary as keys, and id as values;
-     * use @calendarIdMap to save result;
-     * change the calendars where events was use @execute method
+     * Reading list of calendars from gAcount creating a list with {@link CalendarListEntry}
+     * Create a map with the summary as keys, and id as values;
+     * Use @calendarIdMap to save result;
+     * Change the calendars where events was use @execute method
      */
     private static Map<String, String> calendarIdMap;
 
@@ -157,8 +157,8 @@ public class Controller {
 
 
     /**
-     * method choose the time of lesson (i), and set the start and end time for events, with pair.
-     * using the @{@link DateTimeFormatter formatterDay} to format selected date from @{@link LocalDate datePicker};
+     * Method choose the time of lesson (i), and set the start and end time for events, with pair.
+     * Using the @{@link DateTimeFormatter formatterDay} to format selected date from @{@link LocalDate datePicker};
      *
      * @param date  date from DatePicker
      * @param event event which modify;
@@ -224,7 +224,7 @@ public class Controller {
     @FXML
     private TableView<QR> qrTable;
     /**
-     * parent AnchorPane as container for the {@link CheckComboBox} using ControlsFX library
+     * Parent AnchorPane as container for the {@link CheckComboBox} using ControlsFX library
      */
     @FXML
     private AnchorPane parentToCombo;
@@ -328,23 +328,32 @@ public class Controller {
                 getCalendarService();
         List<CalendarListEntry> item = getCalendarListEntries();
         calendarListStrings = FXCollections.observableArrayList(item.stream().map(i -> i.getSummary()).collect(Collectors.toList()));
-        groupChoiceBox = new CheckComboBox<>(FXCollections.observableArrayList(getCalendarListEntries().stream().map(i -> i.getSummary()).filter(i -> i.startsWith("2")).collect(Collectors.toList())));
+        groupChoiceBox = new CheckComboBox<>(FXCollections.observableArrayList(getCalendarListEntries().stream()
+                .map(i -> i.getSummary()).filter(i -> i.startsWith("2")).collect(Collectors.toList())));
         groupChoiceBox.prefHeightProperty().setValue(parentToCombo.heightProperty().getValue());
         groupChoiceBox.prefWidthProperty().setValue(parentToCombo.getPrefWidth());
         parentToCombo.getChildren().add(groupChoiceBox);
-
+        // creating list's with the calendars name;
         auditoryList = calendarIdMap.keySet().stream().filter(i -> i.startsWith("ауд.")).collect(Collectors.toList());
         teachersList = calendarIdMap.keySet().stream().filter(i -> i.endsWith(".")).collect(Collectors.toList());
         lessonList = calendarIdMap.keySet().stream().filter(i -> (i.length() < 4) & !Character.isDigit(i.charAt(0))).collect(Collectors.toList());
+        // bind autocompletion to textfields;
+        TextFields.bindAutoCompletion(auditoryTextField, FXCollections.observableArrayList(auditoryList))
+                .setMaxWidth(auditoryTextField.getPrefWidth());
+        TextFields.bindAutoCompletion(teachersTextField, FXCollections.observableArrayList(teachersList))
+                .setMaxWidth(teachersTextField.getPrefWidth());
+        TextFields.bindAutoCompletion(lessonTextField, FXCollections.observableArrayList(lessonList))
+                .setMaxWidth(lessonTextField.getPrefWidth());
 
-        TextFields.bindAutoCompletion(auditoryTextField, FXCollections.observableArrayList(auditoryList)).setMaxWidth(auditoryTextField.getPrefWidth());
-        TextFields.bindAutoCompletion(teachersTextField, FXCollections.observableArrayList(teachersList)).setMaxWidth(teachersTextField.getPrefWidth());
-        TextFields.bindAutoCompletion(lessonTextField, FXCollections.observableArrayList(lessonList)).setMaxWidth(lessonTextField.getPrefWidth());
-
-        qrList = FXCollections.observableArrayList(calendarIdMap.keySet().stream().map(i -> new QR(i)).collect(Collectors.toList()));
+        /**
+         * Part of code which create a QR tables and realise view part
+         * Generate QR's using zxing
+         **/
+        qrList = FXCollections.observableArrayList(calendarIdMap.keySet()
+                .stream().map(i -> new QR(i)).collect(Collectors.toList()));
         TableColumn<QR, String> id = new TableColumn<>("ID");
         id.setStyle("-fx-alignment: CENTER;");
-        qrList.stream().forEach(i -> System.out.println(i.summaryProperty()));
+        qrList.stream().forEach(i -> System.out.println(i.idCalendarProperty()));
         id.setCellValueFactory(i -> i.getValue().getName());
         TableColumn<QR, ImageView> image = new TableColumn<>("QR");
         image.setStyle("-fx-alignment: CENTER;");
@@ -361,10 +370,15 @@ public class Controller {
 
         qrTable.getColumns().addAll(id, image);
         qrTable.setItems(qrList);
-
+        /**------------------------------------------------------------------------------------------------------------**/
     }
 
-
+    /**
+     * Method which create calendar with entered summary;
+     *
+     * @param name - name of the summary of created calendar entry;
+     * @throws Exception;
+     **/
     public static void createGoogleCalendar(String name) throws Exception {
         Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, authorize())
                 .setApplicationName("applicationName").build();
@@ -386,6 +400,9 @@ public class Controller {
 
     }
 
+    /** Method's which creates calendars with entered summary;
+     *  @throws Exception;
+     * **/
     @FXML
     void createAuditoryCalendar(ActionEvent event) throws Exception {
         if (!(auditoryList.contains(auditoryTextField.getText()))) {
@@ -428,7 +445,9 @@ public class Controller {
         }
     }
 
-
+    /**
+     * Create a toggleGroup for the radioButton's, set the name of selected type to the {@link String lessonType}
+     * */
     @FXML
     void getLessonType(ActionEvent event) {
         ToggleGroup toggleGroup = new ToggleGroup();
@@ -438,14 +457,13 @@ public class Controller {
         radioButton4.setToggleGroup(toggleGroup);
         radioButton5.setToggleGroup(toggleGroup);
         radioButton6.setToggleGroup(toggleGroup);
-
+        // listen changes in the toggle group and create new String with selected lesson;
         toggleGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
             public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle) {
 
                 if (toggleGroup.getSelectedToggle() != null) {
                     RadioButton rb = (RadioButton) toggleGroup.getSelectedToggle();
                     lessonType = new String(rb.getText());
-                    // Do something here with the userData of newly selected radioButton
 
                 }
 
@@ -453,7 +471,10 @@ public class Controller {
         });
     }
 
-
+    /**
+     *@param event - event with special summary
+     * In this method event sends to the all calendars, which laborant selected in the our selection window;
+     * {execute() the event to the account}*/
     public void sendToCalendars(Event event) throws Exception {
 
         String[] cal = event.getSummary().split(" ");
@@ -487,7 +508,9 @@ public class Controller {
         }
     }
 
-
+    /**
+     * Create event with selected params, groups, teachers, using the data from TextFields
+ */
     @FXML
     void executeEvent(ActionEvent e) throws Exception {
         Platform.runLater(new Runnable() {
