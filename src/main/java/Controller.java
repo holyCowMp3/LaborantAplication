@@ -12,6 +12,7 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.*;
+import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -19,10 +20,13 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.util.Duration;
 import org.controlsfx.control.CheckComboBox;
 import org.controlsfx.control.textfield.TextFields;
 import org.controlsfx.validation.ValidationSupport;
@@ -301,6 +305,8 @@ public class Controller {
     @FXML
     private TableColumn<?, ?> saturdayColumn;
 
+    @FXML
+    private TabPane tabPane;
 
     @FXML
     private AnchorPane googleCalendarWeb;
@@ -371,6 +377,38 @@ public class Controller {
         qrTable.getColumns().addAll(id, image);
         qrTable.setItems(qrList);
         /**------------------------------------------------------------------------------------------------------------**/
+        Map<Tab, Node> tabContent = new java.util.HashMap<>();
+        for (Tab tab:tabPane.getTabs()) { tabContent.put(tab, tab.getContent()); }
+        // Initial state:
+        // State change manager:
+        tabPane.getSelectionModel()
+                .selectedItemProperty()
+                .addListener(
+                        (obs, oldTab, newTab) -> {
+                            oldTab.setContent(null);
+                            Node oldContent = tabContent.get(oldTab);
+                            Node newContent = tabContent.get(newTab);
+
+                            newTab.setContent(oldContent);
+                            FadeTransition fadingOut = new FadeTransition(Duration.seconds(0.25),oldContent);
+                            fadingOut.setFromValue(1);
+                            fadingOut.setToValue(0);
+
+                            FadeTransition fadeIn = new FadeTransition(
+                                    Duration.seconds(0.25), newContent);
+                            fadeIn.setFromValue(0);
+                            fadeIn.setToValue(1);
+
+                            fadingOut.setOnFinished(event -> {
+                                newTab.setContent(newContent);
+                            });
+                            SequentialTransition crossFade = new SequentialTransition(
+                                    fadingOut, fadeIn);
+                            crossFade.play();
+                        });
+
+
+
     }
 
     /**
@@ -540,5 +578,6 @@ public class Controller {
             }
         });
     }
+
 }
 

@@ -1,0 +1,72 @@
+@font-face {
+    font-family: Helvetica;
+    src: url('9202.otf');
+}
+
+.tab-pane{
+    -fx-background-color: #1E82F3;
+    -fx-font-family: 'Helvetica';
+    -fx-text-fill: white;
+
+}
+.tab{
+    -fx-background-color: #1E82F3;
+    -fx-padding: 10;
+}
+.tab-label{
+    -fx-text-fill: white;
+}
+.tab-label:selected{
+    -fx-opacity: 0;
+    -fx-padding: 10;
+}
+
+.tab-header-area{
+    -fx-arc-height: 14;
+
+}
+.tab:selected{
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #001999, #163db6, #1e5fd4, #1e82f3);
+
+}
+
+
+.tab-pane > .tab-header-area > .headers-region >.tab:selected .focus-indicator{
+    -fx-border-width: 0px;
+}
+.tab-header-background{
+    -fx-background-color: linear-gradient(from 100% 100% to 0% 0%, #001999, #163db6, #1e5fd4, #1e82f3);
+}
+
+.anchor-pane{
+    -fx-background-color: white;
+    -fx-text-fill: white;
+    -fx-background-image: url('duotone.png');
+    -fx-background-size: cover;
+}
+.anchor-paneForLab{
+    -fx-text-fill: white;
+    -fx-background-color:linear-gradient(#1e5fd4, #001999);
+}
+
+.button {
+
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #001999, #163db6, #1e5fd4, #1e82f3);
+    -fx-background-radius: 50;
+    -fx-font-family:  'Helvetica';
+    -fx-text-fill: white;
+    -fx-font-size: 16;
+
+}
+.button:pressed{
+    -fx-opacity: 0.5;
+
+}
+.table-column{
+    -fx-font-family:  'Helvetica';
+   
+    -fx-font-size: 13;
+    -fx-border-width: 0;
+}
+
+

@@ -27,7 +27,6 @@ public static WritableImage generateQr(String myWeb) {
                 bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
                 bufferedImage.createGraphics();
                 Graphics2D graphics = (Graphics2D) bufferedImage.getGraphics();
-                graphics.setColor(Color.WHITE);
                 graphics.fillRect(0, 0, width, height);
                 graphics.setColor(Color.BLACK);
 
@@ -41,6 +40,7 @@ public static WritableImage generateQr(String myWeb) {
             } catch (WriterException ex) {
                 ex.printStackTrace();
             }
+
             return SwingFXUtils.toFXImage(bufferedImage, null);
     } catch (Exception e) {
         e.printStackTrace();
