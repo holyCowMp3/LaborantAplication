@@ -12,6 +12,7 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.*;
+
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
@@ -37,10 +38,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Controller {
@@ -170,7 +168,7 @@ public class Controller {
      * @return event with start and end times;
      */
 
-    public static Event chooseLesson(String i, Event event, LocalDate date) {
+    private static Event chooseLesson(String i, Event event, LocalDate date) {
         DateTimeFormatter formatterDay = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTime startDateTime;
         DateTime endDateTime;
@@ -335,8 +333,10 @@ public class Controller {
         List<CalendarListEntry> item = getCalendarListEntries();
         calendarListStrings = FXCollections.observableArrayList(item.stream().map(i -> i.getSummary()).collect(Collectors.toList()));
         groupChoiceBox = new CheckComboBox<>(FXCollections.observableArrayList(getCalendarListEntries().stream()
-                .map(i -> i.getSummary()).filter(i -> i.startsWith("2")).collect(Collectors.toList())));
-        groupChoiceBox.prefHeightProperty().setValue(parentToCombo.heightProperty().getValue());
+                .map(i -> i.getSummary())
+                .filter(i -> i.startsWith("2"))
+                .sorted(Comparator.comparingInt(Integer::parseInt))
+                .collect(Collectors.toList())));
         groupChoiceBox.prefWidthProperty().setValue(parentToCombo.getPrefWidth());
         parentToCombo.getChildren().add(groupChoiceBox);
         // creating list's with the calendars name;
@@ -352,7 +352,7 @@ public class Controller {
                 .setMaxWidth(lessonTextField.getPrefWidth());
 
         /**
-         * Part of code which create a QR tables and realise view part
+         * Part of code which creates a QR tables and realise view part
          * Generate QR's using zxing
          **/
         qrList = FXCollections.observableArrayList(calendarIdMap.keySet()
