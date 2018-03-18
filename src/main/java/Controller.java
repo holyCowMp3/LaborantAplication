@@ -364,16 +364,6 @@ public class Controller {
         TableColumn<QR, ImageView> image = new TableColumn<>("QR");
         image.setStyle("-fx-alignment: CENTER;");
         image.setCellValueFactory(i -> new SimpleObjectProperty<>(i.getValue().getCode()));
-        image.setCellFactory(i -> {
-            return new TableCell<>() {
-                @Override
-                protected void updateItem(ImageView item, boolean empty) {
-                    super.updateItem(item, empty);
-                    setGraphic(item);
-                }
-            };
-        });
-
         qrTable.getColumns().addAll(id, image);
         qrTable.setItems(qrList);
         /**------------------------------------------------------------------------------------------------------------**/

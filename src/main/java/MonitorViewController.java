@@ -18,7 +18,7 @@ public class MonitorViewController {
     @FXML
     void initialize() {
 
-            URL page = getClass().getResource("aaa.html");
+            URL page = getClass().getResource("CalendarPages.html");
             koridorWebViewForm.getEngine().load(page.toExternalForm());
 
         Timeline clock = new Timeline(new KeyFrame(Duration.minutes(1), new EventHandler<ActionEvent>() {
