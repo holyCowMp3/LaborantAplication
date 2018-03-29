@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
@@ -13,8 +14,8 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.web.WebView?>
 
 <TabPane fx:id="tabPane" maxHeight="4000.0" maxWidth="4000.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" stylesheets="@main.css" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
   <tabs>
@@ -22,54 +23,48 @@
       <content>
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" styleClass="anchor-pane" stylesheets="@main.css">
                <children>
-                  <SplitPane dividerPositions="0.5" prefHeight="687.0" prefWidth="1280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <SplitPane dividerPositions="0.8035993740219093" prefHeight="687.0" prefWidth="1280.0" styleClass="anchor-pane" stylesheets="@main.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <items>
-                        <BorderPane>
-                           <center>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" styleClass="anchor-pane" stylesheets="@main.css" BorderPane.alignment="CENTER">
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" snapToPixel="false">
+                           <children>
+                              <Label alignment="CENTER" contentDisplay="CENTER" layoutX="136.0" layoutY="327.0" prefHeight="31.0" prefWidth="70.0" text="Група(и)" />
+                              <HBox alignment="TOP_CENTER" layoutX="736.0" layoutY="33.0" prefHeight="33.0" prefWidth="221.0" />
+                              <Label layoutX="369.0" layoutY="235.0" prefHeight="26.0" prefWidth="61.0" text="Предмет" />
+                              <Label layoutX="537.0" layoutY="232.0" prefHeight="31.0" prefWidth="103.0" text="Номер заняття" />
+                              <Label layoutX="652.0" layoutY="237.0" prefHeight="21.0" prefWidth="84.0" text="Тип заняття" />
+                              <Label layoutX="448.0" layoutY="170.0" text="Дата" />
+                              <Button layoutX="406.0" layoutY="482.0" mnemonicParsing="false" onAction="#executeEvent" prefHeight="50.0" prefWidth="226.0" text="Додати пару до розкладу" />
+                              <DatePicker fx:id="datePicker" layoutX="369.0" layoutY="206.0" prefHeight="26.0" prefWidth="192.0" />
+                              <ComboBox fx:id="pairPicker" layoutX="572.0" layoutY="206.0" prefHeight="26.0" prefWidth="82.0" />
+                              <AnchorPane layoutX="308.0" layoutY="263.0" prefHeight="200.0" prefWidth="434.0" style="-fx-border-color: black;">
                                  <children>
-                                    <Label alignment="CENTER" contentDisplay="CENTER" layoutX="136.0" layoutY="327.0" prefHeight="31.0" prefWidth="70.0" text="Група(и)" />
-                                    <HBox alignment="TOP_CENTER" layoutX="736.0" layoutY="33.0" prefHeight="33.0" prefWidth="221.0">
-                                       <children>
-                                          <TextField fx:id="groupTextField" prefHeight="26.0" prefWidth="113.0" />
-                                       </children>
-                                    </HBox>
-                                    <Label layoutX="369.0" layoutY="235.0" prefHeight="26.0" prefWidth="61.0" text="Предмет" />
-                                    <Label layoutX="537.0" layoutY="232.0" prefHeight="31.0" prefWidth="103.0" text="Номер заняття" />
-                                    <Label layoutX="652.0" layoutY="237.0" prefHeight="21.0" prefWidth="84.0" text="Тип заняття" />
-                                    <Label layoutX="448.0" layoutY="170.0" text="Дата" />
-                                    <Button layoutX="406.0" layoutY="482.0" mnemonicParsing="false" onAction="#executeEvent" prefHeight="50.0" prefWidth="226.0" text="Додати пару до розкладу" />
-                                    <DatePicker fx:id="datePicker" layoutX="369.0" layoutY="206.0" prefHeight="26.0" prefWidth="192.0" />
-                                    <ComboBox fx:id="pairPicker" layoutX="572.0" layoutY="206.0" prefHeight="26.0" prefWidth="82.0" />
-                                    <AnchorPane layoutX="308.0" layoutY="263.0" prefHeight="200.0" prefWidth="434.0" style="-fx-border-color: black;">
-                                       <children>
-                                          <TextField fx:id="numberOfLessonTextField" layoutX="230.0" layoutY="14.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="26.0" prefWidth="101.0" />
-                                          <ToolBar layoutX="352.0" layoutY="14.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="25.0" prefWidth="68.0">
-                                             <items>
-                                                <RadioButton fx:id="radioButton1" mnemonicParsing="false" onAction="#getLessonType" text="П/З" />
-                                                <RadioButton fx:id="radioButton2" mnemonicParsing="false" onAction="#getLessonType" text="Г/З" />
-                                                <RadioButton fx:id="radioButton3" mnemonicParsing="false" onAction="#getLessonType" text="Л" />
-                                                <RadioButton fx:id="radioButton4" mnemonicParsing="false" onAction="#getLessonType" text="С" />
-                                                <RadioButton fx:id="radioButton5" mnemonicParsing="false" onAction="#getLessonType" text="Екзамен" />
-                                                <RadioButton fx:id="radioButton6" alignment="CENTER_RIGHT" contentDisplay="CENTER" layoutX="186.0" layoutY="15.0" mnemonicParsing="false" onAction="#getLessonType" prefHeight="18.0" prefWidth="68.0" text="Залік" />
-                                             </items>
-                                          </ToolBar>
-                                          <Label layoutX="184.0" layoutY="52.0" prefHeight="22.0" prefWidth="67.0" text="Викладач" />
-                                          <Label layoutX="72.0" layoutY="138.0" prefHeight="22.0" prefWidth="72.0" text="Аудиторія" />
-                                          <TextField fx:id="lessonTextField" layoutX="14.0" layoutY="14.0" prefHeight="26.0" prefWidth="182.0" />
-                                          <TextField fx:id="teachersTextField" layoutX="159.0" layoutY="87.0" prefHeight="26.0" prefWidth="116.0" />
-                                          <TextField fx:id="auditoryTextField" alignment="TOP_LEFT" layoutX="16.0" layoutY="160.0" prefHeight="26.0" prefWidth="179.0" />
-                                       </children>
-                                    </AnchorPane>
-                                    <AnchorPane fx:id="parentToCombo" layoutX="206.0" layoutY="330.0" prefHeight="33.0" prefWidth="96.0" />
-                                    <Label layoutX="596.0" layoutY="170.0" text="Пара" />
+                                    <TextField fx:id="numberOfLessonTextField" layoutX="230.0" layoutY="14.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="26.0" prefWidth="101.0" />
+                                    <ToolBar layoutX="352.0" layoutY="14.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="25.0" prefWidth="68.0">
+                                       <items>
+                                          <RadioButton fx:id="radioButton1" mnemonicParsing="false" onAction="#getLessonType" text="П/З" />
+                                          <RadioButton fx:id="radioButton2" mnemonicParsing="false" onAction="#getLessonType" text="Г/З" />
+                                          <RadioButton fx:id="radioButton3" mnemonicParsing="false" onAction="#getLessonType" text="Л" />
+                                          <RadioButton fx:id="radioButton4" mnemonicParsing="false" onAction="#getLessonType" text="С" />
+                                          <RadioButton fx:id="radioButton5" mnemonicParsing="false" onAction="#getLessonType" text="Екзамен" />
+                                          <RadioButton fx:id="radioButton6" alignment="CENTER_RIGHT" contentDisplay="CENTER" layoutX="186.0" layoutY="15.0" mnemonicParsing="false" onAction="#getLessonType" prefHeight="18.0" prefWidth="68.0" text="Залік" />
+                                       </items>
+                                    </ToolBar>
+                                    <Label layoutX="184.0" layoutY="52.0" prefHeight="22.0" prefWidth="67.0" text="Викладач" />
+                                    <Label layoutX="72.0" layoutY="138.0" prefHeight="22.0" prefWidth="72.0" text="Аудиторія" />
+                                    <TextField fx:id="lessonTextField" layoutX="14.0" layoutY="14.0" prefHeight="26.0" prefWidth="182.0" />
+                                    <TextField fx:id="teachersTextField" layoutX="159.0" layoutY="87.0" prefHeight="26.0" prefWidth="116.0" />
+                                    <TextField fx:id="auditoryTextField" alignment="TOP_LEFT" layoutX="16.0" layoutY="160.0" prefHeight="26.0" prefWidth="179.0" />
+                                    <CheckBox fx:id="sampoCheckBox" layoutX="344.0" layoutY="164.0" mnemonicParsing="false" text="Сампо" />
                                  </children>
                               </AnchorPane>
-                           </center>
-                        </BorderPane>
-                        <TableView fixedCellSize="0.0" maxHeight="-Infinity" maxWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="926.0" styleClass="table-row-cell" stylesheets="@../table.css">
+                              <AnchorPane fx:id="parentToCombo" layoutX="206.0" layoutY="330.0" prefHeight="33.0" prefWidth="96.0" />
+                              <Label layoutX="596.0" layoutY="170.0" text="Пара" />
+                              <Button layoutX="475.0" layoutY="554.0" mnemonicParsing="false" onAction="#initialize" text="Оновити" />
+                           </children>
+                        </AnchorPane>
+                        <TableView fixedCellSize="0.0" maxHeight="-Infinity" maxWidth="-Infinity" minWidth="400.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="926.0" prefWidth="600.0" styleClass="table-row-cell" stylesheets="@../table.css">
                            <columns>
-                              <TableColumn fx:id="teacherColumn" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Викладач" />
+                              <TableColumn fx:id="teacherColumn" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Викладачі" />
                            </columns>
                            <columnResizePolicy>
                               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -146,7 +141,7 @@
          <content>
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                <children>
-                  <AnchorPane fx:id="googleCalendarWeb" layoutX="1040.0" layoutY="457.0" prefHeight="687.0" prefWidth="1280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <WebView fx:id="googleCalendarWeb" layoutX="517.0" layoutY="226.0" prefHeight="670.0" prefWidth="1280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                </children></AnchorPane>
          </content>
       </Tab>

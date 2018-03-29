@@ -12,8 +12,8 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.*;
-
-import javafx.animation.*;
+import javafx.animation.FadeTransition;
+import javafx.animation.SequentialTransition;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -21,12 +21,16 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.web.WebView;
+import javafx.stage.Screen;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.controlsfx.control.CheckComboBox;
 import org.controlsfx.control.textfield.TextFields;
@@ -36,10 +40,12 @@ import org.controlsfx.validation.Validator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 public class Controller {
     private static final String APPLICATION_NAME =
@@ -85,7 +91,6 @@ public class Controller {
             System.exit(1);
         }
     }
-
     /**
      * Creates an authorized Credential object.
      *
@@ -146,10 +151,9 @@ public class Controller {
         List<CalendarListEntry> listEntries;
         String pageToken = null;
         do {
-            CalendarList calendarList = getCalendarService().calendarList().list().setPageToken(pageToken).execute();
+            CalendarList calendarList = service.calendarList().list().setPageToken(pageToken).execute();
             listEntries = calendarList.getItems();
             calendarIdMap = listEntries.stream().collect(Collectors.toMap(i -> i.getSummary(), i -> i.getId()));
-
             pageToken = calendarList.getNextPageToken();
         }
         while (pageToken != null);
@@ -174,29 +178,36 @@ public class Controller {
         DateTime endDateTime;
         switch (i) {
             case "1": {
-                startDateTime = new DateTime(date.format(formatterDay) + "T09:00:00+02:00");
-                endDateTime = new DateTime(date.format(formatterDay) + "T10:35:00+02:00");
+                startDateTime = new DateTime(date.format(formatterDay) + "T09:00:00+03:00");
+                endDateTime = new DateTime(date.format(formatterDay) + "T10:35:00+03:00");
                 event.setStart(new EventDateTime().setDateTime(startDateTime).setTimeZone("Europe/Kiev"));
                 event.setEnd(new EventDateTime().setDateTime(endDateTime).setTimeZone("Europe/Kiev"));
                 return event;
             }
             case "2": {
-                startDateTime = new DateTime(date.format(formatterDay) + "T10:50:00+02:00");
-                endDateTime = new DateTime(date.format(formatterDay) + "T12:25:00+02:00");
+                startDateTime = new DateTime(date.format(formatterDay) + "T10:50:00+03:00");
+                endDateTime = new DateTime(date.format(formatterDay) + "T12:25:00+03:00");
                 event.setStart(new EventDateTime().setDateTime(startDateTime).setTimeZone("Europe/Kiev"));
                 event.setEnd(new EventDateTime().setDateTime(endDateTime).setTimeZone("Europe/Kiev"));
                 return event;
             }
             case "3": {
-                startDateTime = new DateTime(date.format(formatterDay) + "T12:40:00+02:00");
-                endDateTime = new DateTime(date.format(formatterDay) + "T14:15:00+02:00");
+                startDateTime = new DateTime(date.format(formatterDay) + "T12:40:00+03:00");
+                endDateTime = new DateTime(date.format(formatterDay) + "T14:15:00+03:00");
                 event.setStart(new EventDateTime().setDateTime(startDateTime).setTimeZone("Europe/Kiev"));
                 event.setEnd(new EventDateTime().setDateTime(endDateTime).setTimeZone("Europe/Kiev"));
                 return event;
             }
             case "4": {
-                startDateTime = new DateTime(date.format(formatterDay) + "T15:45:00+02:00");
-                endDateTime = new DateTime(date.format(formatterDay) + "T17:20:00+02:00");
+                startDateTime = new DateTime(date.format(formatterDay) + "T15:45:00+03:00");
+                endDateTime = new DateTime(date.format(formatterDay) + "T17:20:00+03:00");
+                event.setStart(new EventDateTime().setDateTime(startDateTime).setTimeZone("Europe/Kiev"));
+                event.setEnd(new EventDateTime().setDateTime(endDateTime).setTimeZone("Europe/Kiev"));
+                return event;
+            }
+            case "Сампо": {
+                startDateTime = new DateTime(date.format(formatterDay) + "T15:45:00+03:00");
+                endDateTime = new DateTime(date.format(formatterDay) + "T18:50:00+03:00");
                 event.setStart(new EventDateTime().setDateTime(startDateTime).setTimeZone("Europe/Kiev"));
                 event.setEnd(new EventDateTime().setDateTime(endDateTime).setTimeZone("Europe/Kiev"));
                 return event;
@@ -211,7 +222,17 @@ public class Controller {
         }
         return null;
     }
+    private  Scene scene;
 
+    {
+        try {
+            scene = new Scene(FXMLLoader.load(getClass().getResource("testView.fxml")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private  Stage stage = new Stage();
     /**
      * @ObservableList<String> list with summary of each calendar;
      */
@@ -235,7 +256,6 @@ public class Controller {
 
     @FXML
     private TextField groupTextField;
-
 
     @FXML
     private TextField teachersTextField;
@@ -275,6 +295,8 @@ public class Controller {
     @FXML
     private RadioButton radioButton6;
 
+    @FXML
+    private CheckBox sampoCheckBox;
 
     @FXML
     private TableColumn<?, ?> teacherColumn;
@@ -307,8 +329,19 @@ public class Controller {
     private TabPane tabPane;
 
     @FXML
-    private AnchorPane googleCalendarWeb;
+    private WebView googleCalendarWeb;
 
+    private  static  com.google.api.services.calendar.Calendar service;
+
+    static {
+
+        try {
+            service = getCalendarService();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private String lessonType;
 
@@ -318,28 +351,32 @@ public class Controller {
 
     @FXML
     void initialize() throws Exception {
+    pairPicker.setItems(FXCollections.observableArrayList("1", "2", "3","4"));
+        URL page = getClass().getResource("CalendarPages.html");
+
+        googleCalendarWeb.getEngine().load(page.toExternalForm());
 
         ValidationSupport validationSupport = new ValidationSupport();
 
         radioButton1.setSelected(true);
-        pairPicker.getItems().addAll("1", "2", "3", "4");
+
         validationSupport.registerValidator(pairPicker, Validator.createEmptyValidator("Потрібно обрати пару"));
 
         // Build a new authorized API client service.
         // Note: Do not confuse this class with the
         //   com.google.api.services.calendar.model.Calendar class.
-        com.google.api.services.calendar.Calendar service =
-                getCalendarService();
+        // creating list's with the calendars name;
         List<CalendarListEntry> item = getCalendarListEntries();
+
         calendarListStrings = FXCollections.observableArrayList(item.stream().map(i -> i.getSummary()).collect(Collectors.toList()));
-        groupChoiceBox = new CheckComboBox<>(FXCollections.observableArrayList(getCalendarListEntries().stream()
+        groupChoiceBox = new CheckComboBox<>(FXCollections.observableArrayList(item.stream()
                 .map(i -> i.getSummary())
-                .filter(i -> i.startsWith("2"))
+                .filter(i -> (i.length()==3)&&(Character.isDigit(i.charAt(2))))
                 .sorted(Comparator.comparingInt(Integer::parseInt))
                 .collect(Collectors.toList())));
         groupChoiceBox.prefWidthProperty().setValue(parentToCombo.getPrefWidth());
         parentToCombo.getChildren().add(groupChoiceBox);
-        // creating list's with the calendars name;
+
         auditoryList = calendarIdMap.keySet().stream().filter(i -> i.startsWith("ауд.")).collect(Collectors.toList());
         teachersList = calendarIdMap.keySet().stream().filter(i -> i.endsWith(".")).collect(Collectors.toList());
         lessonList = calendarIdMap.keySet().stream().filter(i -> (i.length() < 4) & !Character.isDigit(i.charAt(0))).collect(Collectors.toList());
@@ -350,25 +387,48 @@ public class Controller {
                 .setMaxWidth(teachersTextField.getPrefWidth());
         TextFields.bindAutoCompletion(lessonTextField, FXCollections.observableArrayList(lessonList))
                 .setMaxWidth(lessonTextField.getPrefWidth());
-
+        validationSupport.registerValidator(auditoryTextField, Validator.createEqualsValidator("Оберіть аудиторію із списку",auditoryList));
+        validationSupport.registerValidator(teachersTextField, Validator.createEqualsValidator("Оберіть аудиторію із списку",teachersList));
+        validationSupport.registerValidator(lessonTextField, Validator.createEqualsValidator("Оберіть аудиторію із списку",lessonList));
+        validationSupport.registerValidator(auditoryTextField, Validator.createEqualsValidator("Оберіть аудиторію із списку",auditoryList));
         /**
          * Part of code which creates a QR tables and realise view part
          * Generate QR's using zxing
          **/
-        qrList = FXCollections.observableArrayList(calendarIdMap.keySet()
-                .stream().map(i -> new QR(i)).collect(Collectors.toList()));
-        TableColumn<QR, String> id = new TableColumn<>("ID");
-        id.setStyle("-fx-alignment: CENTER;");
-        qrList.stream().forEach(i -> System.out.println(i.idCalendarProperty()));
-        id.setCellValueFactory(i -> i.getValue().getName());
-        TableColumn<QR, ImageView> image = new TableColumn<>("QR");
-        image.setStyle("-fx-alignment: CENTER;");
-        image.setCellValueFactory(i -> new SimpleObjectProperty<>(i.getValue().getCode()));
-        qrTable.getColumns().addAll(id, image);
-        qrTable.setItems(qrList);
+
+        qrTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        if (qrTable.getColumns().size()==0) {
+            qrList = FXCollections.observableArrayList(calendarIdMap.keySet()
+                    .stream().map(i -> new QR(i)).collect(Collectors.toList()));
+            TableColumn<QR, String> id = new TableColumn<>("ID");
+            id.setStyle("-fx-alignment: CENTER;");
+            id.setCellValueFactory(i -> i.getValue().getName());
+            TableColumn<QR, ImageView> image = new TableColumn<>("QR");
+            image.setStyle("-fx-alignment: CENTER;");
+            image.setCellValueFactory(i -> new SimpleObjectProperty<>(i.getValue().getCode()));
+            qrTable.getColumns().addAll(id, image);
+            qrTable.setItems(qrList);
+        } else {
+            qrTable.getColumns().clear();
+            qrList = FXCollections.observableArrayList(calendarIdMap.keySet()
+                    .stream().map(i -> new QR(i)).collect(Collectors.toList()));
+            TableColumn<QR, String> id = new TableColumn<>("ID");
+            id.setStyle("-fx-alignment: CENTER;");
+            qrList.stream().forEach(i -> System.out.println(i.idCalendarProperty()));
+            id.setCellValueFactory(i -> i.getValue().getName());
+            TableColumn<QR, ImageView> image = new TableColumn<>("QR");
+            image.setStyle("-fx-alignment: CENTER;");
+            image.setCellValueFactory(i -> new SimpleObjectProperty<>(i.getValue().getCode()));
+            qrTable.getColumns().addAll(id, image);
+        }
+
+
+
         /**------------------------------------------------------------------------------------------------------------**/
         Map<Tab, Node> tabContent = new java.util.HashMap<>();
-        for (Tab tab:tabPane.getTabs()) { tabContent.put(tab, tab.getContent()); }
+        for (Tab tab : tabPane.getTabs()) {
+            tabContent.put(tab, tab.getContent());
+        }
         // Initial state:
         // State change manager:
         tabPane.getSelectionModel()
@@ -380,7 +440,7 @@ public class Controller {
                             Node newContent = tabContent.get(newTab);
 
                             newTab.setContent(oldContent);
-                            FadeTransition fadingOut = new FadeTransition(Duration.seconds(0.25),oldContent);
+                            FadeTransition fadingOut = new FadeTransition(Duration.seconds(0.25), oldContent);
                             fadingOut.setFromValue(1);
                             fadingOut.setToValue(0);
 
@@ -397,8 +457,21 @@ public class Controller {
                             crossFade.play();
                         });
 
+        ObservableList<Screen> screens = Screen.getScreens();
 
 
+       if (screens.size()>=2) {
+            if (stage.isShowing()) {
+                stage.close();
+            }
+            stage.setScene(scene);
+            stage.setFullScreen(true);
+           stage.setX(screens.get(1).getBounds().getMinX() + 100);
+           stage.setY(screens.get(1).getBounds().getMinY() + 100);
+            stage.setTitle("view");
+            stage.setScene(scene);
+            stage.show();
+        }
     }
 
     /**
@@ -407,11 +480,12 @@ public class Controller {
      * @param name - name of the summary of created calendar entry;
      * @throws Exception;
      **/
+
     public static void createGoogleCalendar(String name) throws Exception {
         Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, authorize())
                 .setApplicationName("applicationName").build();
 
-        AclRule aclRule = service.acl().get(name, "ruleId").execute();
+        // AclRule aclRule = service.acl().get(name, "ruleId").execute();
 
         // Create a new calendar
         com.google.api.services.calendar.model.Calendar calendar = new com.google.api.services.calendar.model.Calendar();
@@ -428,54 +502,56 @@ public class Controller {
 
     }
 
-    /** Method's which creates calendars with entered summary;
-     *  @throws Exception;
-     * **/
-    @FXML
-    void createAuditoryCalendar(ActionEvent event) throws Exception {
-        if (!(auditoryList.contains(auditoryTextField.getText()))) {
-            createGoogleCalendar(auditoryTextField.getText());
-            auditoryList.add(auditoryTextField.getText());
-        } else {
-
-        }
-
-    }
-
-    @FXML
-    void createGroupCalendar(ActionEvent event) throws Exception {
-        if (!(groupChoiceBox.getItems().contains(groupTextField.getText()))) {
-            createGoogleCalendar(groupTextField.getText());
-            groupChoiceBox.getItems().add(groupTextField.getText());
-        } else {
-
-        }
-    }
-
-    @FXML
-    void createLessonCalendar(ActionEvent event) throws Exception {
-        if (!(lessonList.contains(lessonTextField.getText()))) {
-            createGoogleCalendar(lessonTextField.getText());
-            lessonList.add(lessonTextField.getText());
-        } else {
-
-        }
-
-    }
-
-    @FXML
-    void createTeacherCalendar(ActionEvent event) throws Exception {
-        if (!(teachersList.contains(teachersTextField.getText()))) {
-            createGoogleCalendar(teachersTextField.getText());
-            teachersList.add(teachersTextField.getText());
-        } else {
-
-        }
-    }
+//    /**
+//     * Method's which creates calendars with entered summary;
+//     *
+//     * @throws Exception;
+//     **/
+//    @FXML
+//    void createAuditoryCalendar(ActionEvent event) throws Exception {
+//        if (!(auditoryList.contains(auditoryTextField.getText()))) {
+//            createGoogleCalendar(auditoryTextField.getText());
+//            auditoryList.add(auditoryTextField.getText());
+//        } else {
+//
+//        }
+//
+//    }
+//
+//    @FXML
+//    void createGroupCalendar(ActionEvent event) throws Exception {
+//        if (!(groupChoiceBox.getItems().contains(groupTextField.getText()))) {
+//            createGoogleCalendar(groupTextField.getText());
+//            groupChoiceBox.getItems().add(groupTextField.getText());
+//        } else {
+//
+//        }
+//    }
+//
+//    @FXML
+//    void createLessonCalendar(ActionEvent event) throws Exception {
+//        if (!(lessonList.contains(lessonTextField.getText()))) {
+//            createGoogleCalendar(lessonTextField.getText());
+//            lessonList.add(lessonTextField.getText());
+//        } else {
+//
+//        }
+//
+//    }
+//
+//    @FXML
+//    void createTeacherCalendar(ActionEvent event) throws Exception {
+//        if (!(teachersList.contains(teachersTextField.getText()))) {
+//            createGoogleCalendar(teachersTextField.getText());
+//            teachersList.add(teachersTextField.getText());
+//        } else {
+//
+//        }
+//    }
 
     /**
      * Create a toggleGroup for the radioButton's, set the name of selected type to the {@link String lessonType}
-     * */
+     */
     @FXML
     void getLessonType(ActionEvent event) {
         ToggleGroup toggleGroup = new ToggleGroup();
@@ -485,6 +561,7 @@ public class Controller {
         radioButton4.setToggleGroup(toggleGroup);
         radioButton5.setToggleGroup(toggleGroup);
         radioButton6.setToggleGroup(toggleGroup);
+
         // listen changes in the toggle group and create new String with selected lesson;
         toggleGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
             public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle) {
@@ -492,7 +569,6 @@ public class Controller {
                 if (toggleGroup.getSelectedToggle() != null) {
                     RadioButton rb = (RadioButton) toggleGroup.getSelectedToggle();
                     lessonType = new String(rb.getText());
-
                 }
 
             }
@@ -500,74 +576,129 @@ public class Controller {
     }
 
     /**
-     *@param event - event with special summary
-     * In this method event sends to the all calendars, which laborant selected in the our selection window;
-     * {execute() the event to the account}*/
+     * @param event - event with special summary
+     *              In this method event sends to the all calendars, which laborant selected in the our selection window;
+     *              {execute() the event to the account}
+     */
     public void sendToCalendars(Event event) throws Exception {
 
+
+
+//        for (String i : cal){
+//            if (!getCalendarListEntries().stream().anyMatch(j -> j.getSummary() ==i)){
+//                createGoogleCalendar(i);
+//            }
+//        }
         String[] cal = event.getSummary().split(" ");
         DateTime now = new DateTime(System.currentTimeMillis());
-        System.out.println(cal[1]);
-        Events events = getCalendarService().events().list(calendarIdMap.get(cal[1]))
-                .setMaxResults(10)
-                .setTimeMin(event.getStart().getDateTime()).setTimeMax(event.getEnd().getDateTime())
-                .setOrderBy("startTime")
-                .setSingleEvents(true)
+
+        Events events = service.events().list(calendarIdMap.get(cal[0]))
+                .setTimeMin(event.getStart().getDate())
                 .execute();
+
         List<Event> items = events.getItems();
         if (items.size() == 0) {
-            for (String s : cal) {
-                String calendarId = new String(calendarIdMap.get(s));
-                event = getCalendarService().events().insert(calendarId, event).execute();
 
-                System.out.println(event.getHtmlLink());
-            }
+            pushingToCalendars(event);
+
         } else {
-            if (items.get(0).getStart().toString() == event.getStart().toString()) {
-
-                Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("Дані пари вже існують!");
-                alert.setHeaderText("Перевірте правильність вводу");
-                alert.setContentText("Будьте обережні наступного разу");
-
-                alert.showAndWait();
-
+            System.out.println("here hi");
+            boolean flag = true;
+            for (Event s : items) {
+                if ((s.getStart().getDateTime().toStringRfc3339() == event.getStart().getDateTime().toStringRfc3339()) && (s.getSummary().contentEquals(event.getSummary()))) {
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Дані пари вже існують!");
+                    alert.setHeaderText("Перевірте правильність вводу");
+                    alert.setContentText("Будьте обережні наступного разу");
+                    alert.showAndWait();
+                    flag = false;
+                }
             }
+
+            if (flag) {
+                pushingToCalendars(event);
+            }
+            initialize();
         }
+    }
+
+
+    /**
+     * Split the summary of calendar before executting to the Calendar;
+     * @param event - event which were push;
+     *        @return @{@link Event} object
+     * */
+    public Event pushingToCalendars(Event event) throws IOException {
+
+
+        event = service.events().insert("vitikaf22@gmail.com", event).execute();
+        String[] cal = event.getSummary().split(" ");
+        for (String s : cal) {
+            System.out.println(s);
+            String calendarId = new String(calendarIdMap.get(s));
+            event = service.events().insert(calendarId, event).execute();
+        }
+        return event;
     }
 
     /**
      * Create event with selected params, groups, teachers, using the data from TextFields
- */
+     */
     @FXML
     void executeEvent(ActionEvent e) throws Exception {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String groups = String.join(" ", groupChoiceBox.getCheckModel().getCheckedItems());
-                    System.out.println(groups);
-                    Event event = new Event()
-                            .setSummary(groups + " " + auditoryTextField.getText() + " " + teachersTextField.getText() + " " + lessonTextField.getText())
-                            .setDescription(numberOfLessonTextField.getText() + "  " + lessonType);
-                    event = chooseLesson(pairPicker.getValue(), event, datePicker.getValue());
+        if (!sampoCheckBox.isSelected()) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        String groups = String.join(" ", groupChoiceBox.getCheckModel().getCheckedItems());
 
-                    EventReminder[] reminderOverrides = new EventReminder[]{
-                            new EventReminder().setMethod("email").setMinutes(24 * 60),
-                            new EventReminder().setMethod("popup").setMinutes(15),
-                    };
-                    Event.Reminders reminders = new Event.Reminders()
-                            .setUseDefault(false)
-                            .setOverrides(Arrays.asList(reminderOverrides));
-                    event.setReminders(reminders);
-                    event.setCreator(new Event.Creator().setEmail("hellios.dt@gmail.com"));
-                    sendToCalendars(event);
-                } catch (Exception e) {
-                    e.printStackTrace();
+
+                        Event event = new Event()
+                                .setSummary(groups + " " + auditoryTextField.getText() + " " + teachersTextField.getText() + " " + lessonTextField.getText())
+                                .setDescription(numberOfLessonTextField.getText() + "  " + lessonType);
+                        event = chooseLesson(pairPicker.getValue(), event, datePicker.getValue());
+
+                        EventReminder[] reminderOverrides = new EventReminder[]{
+                                new EventReminder().setMethod("email").setMinutes(24 * 60),
+                                new EventReminder().setMethod("popup").setMinutes(15),
+                        };
+                        Event.Reminders reminders = new Event.Reminders()
+                                .setUseDefault(false)
+                                .setOverrides(Arrays.asList(reminderOverrides));
+                        event.setReminders(reminders);
+                        sendToCalendars(event);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
-    }
+            });
+        } else {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        String groups = String.join(" ", groupChoiceBox.getCheckModel().getCheckedItems());
+                        Event event = new Event()
+                                .setSummary(groups + " " + auditoryTextField.getText() + "Сампо");
+                        event = chooseLesson("Сампо", event, datePicker.getValue());
 
+                        EventReminder[] reminderOverrides = new EventReminder[]{
+                                new EventReminder().setMethod("popup").setMinutes(15)
+                        };
+
+                        Event.Reminders reminders = new Event.Reminders()
+                                .setUseDefault(false)
+                                .setOverrides(Arrays.asList(reminderOverrides));
+                        event.setReminders(reminders);
+                        sendToCalendars(event);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+        });
+        }
+
+    }
 }
 

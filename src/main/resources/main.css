@@ -1,6 +1,6 @@
 @font-face {
     font-family: Helvetica;
-    src: url('9202.otf');
+    src: url('Helvetica.otf');
 }
 
 .tab-pane{
@@ -41,7 +41,7 @@
 .anchor-pane{
     -fx-background-color: white;
     -fx-text-fill: white;
-    -fx-background-image: url('duotone.png');
+    -fx-background-image: url('background.png');
     -fx-background-size: cover;
 }
 .anchor-paneForLab{

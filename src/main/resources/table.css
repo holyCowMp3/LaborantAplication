@@ -1,4 +1,35 @@
+@font-face {
+    font-family: Helvetica;
+    src: url('Helvetica.otf');
+}
+
+.table-view{
+    -fx-font-family: Helvetica;
+    -fx-font-size: 25;
+    -fx-text-alignment: CENTER;
+
+}
 .table-row-cell {
-    -fx-cell-size: 80px;
-    -fx-alignment: CENTER;
+    -fx-size: 80px;
+
+    -fx-text-alignment: CENTER;
+
+}
+.column-header{
+    -fx-size: 40px;
+    -fx-background-color: #1e5fd4;
+}
+.label{
+    -fx-text-fill: white;
+}
+.thumb{
+    -fx-background-color: #1e5fd4;
+    -fx-background-radius: 15;
+}
+.track{
+    -fx-background-color: white;
+}
+
+.filler {
+    -fx-background-color: #1e5fd4;
 }

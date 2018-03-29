@@ -6,8 +6,6 @@ import javafx.fxml.FXML;
 import javafx.scene.web.WebView;
 import javafx.util.Duration;
 
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 
 public class MonitorViewController {
